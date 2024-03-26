@@ -11,8 +11,15 @@ export class PostEntity implements IPost {
     @Column()
     name:string;
 
-    @Column({unique:true})
+    @Column({unique:false})
     description:string;
+
+    @Column({name:"is_published"}) // db column name
+    isPublished:boolean;
+
+
+    @Column({name:"author_id"}) // db column name
+    authorId:string;
 
     constructor(post:IPost){
         if(post){

@@ -1,0 +1,93 @@
+version: '3'
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    networks:
+      - post-network
+    ports:
+      - "5674:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest  
+
+  post-db:
+    image: postgres
+    restart: always
+    networks:
+      - post-network
+    environment:
+      POSTGRES_DB: postdb
+      POSTGRES_USER: postuser
+      POSTGRES_PASSWORD: postpassword
+    # ports:
+      # - "5434:5432"
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - post-network  
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: myadminuser
+      MONGO_INITDB_ROOT_PASSWORD: myadminpassword
+      MONGO_INITDB_DATABASE: mydatabase
+    volumes:
+      - mongodb_data:/data/db
+
+
+  
+  post-service:
+    build:
+      context: .
+      dockerfile: .Dockerfile
+    restart: always
+    networks:
+      - post-network
+    depends_on:
+      - post-db
+      - mongodb
+      - rabbitmq
+    environment:
+      TYPEORM_HOST: post-db
+      TYPEORM_PORT: 5432
+      TYPEORM_USERNAME: postuser
+      TYPEORM_PASSWORD: postpassword
+      TYPEORM_DATABASE: postdb
+
+      TYPEORM_HOST2: mongodb
+      TYPEORM_PORT2: 27017
+      TYPEORM_USERNAME2: myadminuser
+      TYPEORM_PASSWORD2: myadminpassword
+      TYPEORM_DATABASE2: mydatabase
+    ports:
+      - "5000:5000"
+    volumes:
+    - .:/app
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin   
+
+    
+
+networks:
+  post-network:
+
+volumes:
+  postgres_data:
+  pgadmin-data:
+  rabbitmq_data:
+  mongodb_data:
+    driver: local

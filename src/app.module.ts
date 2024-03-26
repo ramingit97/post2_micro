@@ -5,10 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSource } from './ormconfig';
 import { RmqModule } from './rmq/rmq.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { dataSource2 } from './ormconfig2';
 
 @Module({
   imports: [
-    
     RmqModule,
     ConfigModule.forRoot({
       isGlobal:true,
@@ -17,6 +17,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     TypeOrmModule.forRootAsync({
       inject:[ConfigService],
       useFactory:()=>dataSource.options
+    }),
+    TypeOrmModule.forRootAsync({
+      inject:[ConfigService],
+      useFactory:()=>dataSource2.options
     }),
     PostModule,
 

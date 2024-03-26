@@ -3,7 +3,6 @@ import { config as dotenvConfig } from 'dotenv';
 import {DataSource, DataSourceOptions} from 'typeorm';
 dotenvConfig({ path: './.development.env' });
 
-// Check typeORM documentation for more information.
 export const ormConfig: DataSourceOptions = {
   type: 'postgres',
   host: process.env.TYPEORM_HOST,
@@ -18,16 +17,14 @@ export const ormConfig: DataSourceOptions = {
 
   // Run migrations automatically,
   // you can disable this if you prefer running migration manually.
-  migrationsRun: true,
+  migrationsRun: false,
   logging: false,
 
   // allow both start:prod and start:dev to use migrations
   // __dirname is either dist or src folder, meaning either
   // the compiled js in prod or the ts in dev
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-    
 };
 
-console.log('ormConfig',ormConfig)
 export default registerAs('typeorm', () => ormConfig)
 export const dataSource = new DataSource(ormConfig)

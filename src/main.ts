@@ -10,15 +10,15 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        host: 'post-service',
-        port: 5000,
+        host: 'post-service2',
+        port: 6000,
       },
     },
   );
   const rmqService = appTcp.get<RmqService>(RmqService);
   const appRmq = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
-    rmqService.getOptions('post_queue')
+    rmqService.getOptions('post_queue2')
   );
 
   await appTcp.listen();
