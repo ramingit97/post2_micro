@@ -1,23 +1,27 @@
-import { Body, Controller, Get, Header, Headers, HttpException, HttpStatus, Inject, NotFoundException, Param, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
-import { Ctx, EventPattern, MessagePattern, Payload, RmqContext, RpcException, TcpContext } from '@nestjs/microservices';
+import { Body, Controller, Get, Header, Headers, HttpException, HttpStatus, Inject, NotFoundException, OnModuleInit, Param, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ClientKafka, ClientProxy, Ctx, EventPattern, KafkaContext, MessagePattern, Payload, RmqContext, RpcException, TcpContext } from '@nestjs/microservices';
 import { PostService } from './post.service';
 import { PostCreateDto } from './dto/post-create.dto';
 import { RmqService } from 'src/rmq/rmq.service';
 import { PostFacade } from './post.facade';
 import { PostMongoService } from './post-mongo.service';
+import { KafkaService } from 'src/kafka/kafka.producer.service';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('')
-export class PostController {
+export class PostController implements OnModuleInit{
     
     constructor(
         private postService:PostService,
         private rmqService:RmqService,
         private readonly postFacade:PostFacade,
-        private readonly postMongoService:PostMongoService
-        ){}
+        private readonly postMongoService:PostMongoService,
+        private readonly kafkaService:KafkaService,
+        @Inject("Auth_Service_Kafka") private readonly authService:ClientKafka,
+    ){}
 
     @UsePipes(ValidationPipe)
-    @MessagePattern("create_post")
+    @EventPattern("posts")
     async createPost(@Payload() data:PostCreateDto){
         let result = await this.postFacade.commands.createPost(data);
         return result;
@@ -62,6 +66,48 @@ export class PostController {
     }
 
 
+    @EventPattern("posts222")
+    async createPost2(@Payload() data:any,@Ctx() context:KafkaContext){
+        // let eventType = context.getMessage().headers['eventType'] as string;
+        // this.eventEmitter.emit(eventType, data);
+        console.log(data,"data222");
+        
+        console.log(`Partition 11122- ${context.getPartition()} - ${context.getConsumer()}`);
+        // this.authService.send("get.user.info",{
+
+        // })
+
+        // this.authService.emit("get.user.info",{
+        //     key:'create',
+        //     topic:'get.user.info',
+        //     headers:{eventType:"orders.create"},
+        //     value:1
+        // }).subscribe(result=>{
+        //     console.log("222222222222222222222",result)
+        // })
+        
+
+        // console.log('res',result);
+
+        // this.getHome()
+        // this.kafkaService.produce({
+        //     topic:'orders',
+        //     messages:[{
+        //       value:'Hello world'
+        //     }]
+        // })
+    }
+
+    @MessagePattern("create_post1")
+    async create_post(){
+        // console.log("agent",agent2)
+        return {"ramin":"tupoy"};
+    }
+
+
+    async onModuleInit() {
+        this.authService.subscribeToResponseOf("get.user.info");
+    }
 
    
 

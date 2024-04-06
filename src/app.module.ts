@@ -6,10 +6,12 @@ import { dataSource } from './ormconfig';
 import { RmqModule } from './rmq/rmq.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { dataSource2 } from './ormconfig2';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
     RmqModule,
+    KafkaModule,
     ConfigModule.forRoot({
       isGlobal:true,
       envFilePath:'./.development.env'
